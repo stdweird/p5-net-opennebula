@@ -37,4 +37,18 @@ sub get_data {
    return $self->{extended_data};
 }
 
+
+sub create {
+   my ($self, $tpl_txt) = @_;
+   my $id = $self->_onerpc("allocate", [ string => $tpl_txt ]);
+   $self->{data} =  $self->_get_info(id => $id); 
+   return $id;
+}
+
+
+sub delete {
+    my ($self) = @_;
+    return $self->_onerpc_id("delete");
+}
+
 1;
