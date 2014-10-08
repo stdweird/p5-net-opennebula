@@ -2,6 +2,7 @@ package Net::OpenNebula::DummyLogger;
 
 use strict;
 use warnings;
+use version;
 
 sub new {
     my $that = shift;
@@ -55,6 +56,9 @@ sub new {
 
     $self->{log}->debug(2, "Initialised with user $self->{user} and url $self->{url}.");
 
+    # Cache and test rpc
+    $self->version();
+
     return $self;
 }
 
@@ -106,7 +110,7 @@ sub _rpc {
     
     elsif($ret->[0] == 1) {
         $self->debug(5, "_rpc RPC answer $ret->[1]");
-        if($ret->[1] =~ m/^\d+$/) {
+        if($ret->[1] =~ m/^(\d|\.)+$/) {
             return $ret->[1];
         }
         else {
@@ -124,6 +128,26 @@ sub _rpc {
     }   
 
 }
+
+
+sub version {
+    my ($self) = @_;
+    
+    # cached value
+    if(exists($self->{_version})) {
+        return $self->{_version};
+    }
+    my $version = $self->_rpc("one.system.version");
+
+    if(defined($version)) {
+        $self->verbose("Version $version found");
+        $self->{_version} = version->new($version);
+        return $self->{_version};
+    } else {
+        $self->error("Failed to retrieve version");
+    }
+}
+
 
 # add logging shortcuts
 no strict 'refs';
