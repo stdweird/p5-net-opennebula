@@ -5,12 +5,10 @@
 # vim: set expandtab:
 #
 # !no_doc!
-   
-
-package Net::OpenNebula::VM;
-
 use strict;
 use warnings;
+
+package Net::OpenNebula::VM;
 
 use Net::OpenNebula::RPC;
 push our @ISA , qw(Net::OpenNebula::RPC);
@@ -114,7 +112,7 @@ sub get_data {
 }
 
 # define all generic actions
-no strict 'refs';
+no strict 'refs'; ## no critic
 foreach my $i (qw(shutdown shutdown_hard reboot reboot_hard poweroff poweroff_hard 
                   suspend resume restart stop delete delete_recreate hold release 
                   boot resched unresched undeploy undeploy_hard)) {

@@ -5,12 +5,11 @@
 # vim: set expandtab:
 #
 # !no_doc!
-  
+use strict;
+use warnings;
 
 package Net::OpenNebula::VNet;
 
-use strict;
-use warnings;
 use version;
 
 use Net::OpenNebula::RPC;
@@ -130,7 +129,7 @@ sub get_ar {
             } else {
                 # http://www.perlmonks.org/?node_id=440768
                 # Use doubles, no int (bit operators use ints)
-                sub mac_hex2num {
+                my $mac_hex2num = sub {
                     my $mac_hex = shift;
                     $mac_hex =~ s/://g;
                     $mac_hex = substr(('0'x12).$mac_hex, -12);
@@ -142,8 +141,8 @@ sub get_ar {
                     return $mac_num;
                 };
                 
-                my $om = mac_hex2num($opts{mac});
-                my $am = mac_hex2num($mac); 
+                my $om = &$mac_hex2num($opts{mac});
+                my $am = &$mac_hex2num($mac); 
                 # include boundaries of size?
                 if( ($om < $am) || ($om > ($am + $size -1) )) {
                     $self->debug(2, "$msg NO match: requested mac $opts{mac} falls outside the range starting with AR MAC $mac and size $size (int mac $om AR MAC $am)");
@@ -159,7 +158,7 @@ sub get_ar {
                 $match = 0;    
             } else {
                 # Use doubles, no int (bit operators use ints)
-                sub ip2num {
+                my $ip2num = sub {
                     my $ip = shift;
                     my $num = 0;
                     foreach (split(/\./, $ip)) {
@@ -168,8 +167,8 @@ sub get_ar {
                     return $num;
                 };
                 
-                my $oi = ip2num($opts{ip});
-                my $ai = ip2num($ip); 
+                my $oi = &$ip2num($opts{ip});
+                my $ai = &$ip2num($ip); 
                 # include boundaries of size?
                 if( ($oi < $ai) || ($oi > ($ai + $size -1) )) {
                     $self->debug(2, "$msg NO match: requested ip $opts{ip} falls outside the range starting with AR IP $ip and size $size (int ip $oi AR IP $ai)");

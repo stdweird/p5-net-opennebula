@@ -1,7 +1,7 @@
-package Net::OpenNebula::RPC;
-
 use strict;
 use warnings;
+
+package Net::OpenNebula::RPC;
 
 use Data::Dumper;
 
@@ -197,7 +197,7 @@ sub wait_for_state {
 }
 
 # add logging shortcuts
-no strict 'refs';
+no strict 'refs'; ## no critic
 foreach my $i (qw(error warn info verbose debug)) {
     *{$i} = sub {
         my ($self, @args) = @_;

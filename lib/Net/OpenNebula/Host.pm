@@ -4,6 +4,8 @@
 # vim: set ts=3 sw=3 tw=0:
 # vim: set expandtab:
 #
+use strict;
+use warnings;
 
 =head1 NAME
 
@@ -28,9 +30,6 @@ Query the Hoststatus of an OpenNebula host.
 =cut
 
 package Net::OpenNebula::Host;
-
-use strict;
-use warnings;
 
 use Net::OpenNebula::RPC;
 push our @ISA , qw(Net::OpenNebula::RPC);

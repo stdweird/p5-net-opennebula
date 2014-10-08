@@ -1,7 +1,9 @@
-package Net::OpenNebula::DummyLogger;
-
 use strict;
 use warnings;
+
+# packge the DummyLogger together with the RPCClient package
+package Net::OpenNebula::DummyLogger; ## no critic
+
 use version;
 
 sub new {
@@ -15,7 +17,7 @@ sub new {
 }
 
 # Mock basic methods of Log4Perl getLogger instance
-no strict 'refs';
+no strict 'refs'; ## no critic
 foreach my $i (qw(error warn info verbose debug)) {
     *{$i} = sub {}
 }
@@ -23,9 +25,6 @@ use strict 'refs';
 
 
 package Net::OpenNebula::RPCClient;
-
-use strict;
-use warnings;
 
 use XML::Simple;
 use RPC::XML;
@@ -123,7 +122,7 @@ sub _rpc {
         if( $self->{fail_on_rpc_fail}) {
             die("error sending request.");
         } else {
-            return undef;
+            return;
         }
     }   
 
@@ -150,7 +149,7 @@ sub version {
 
 
 # add logging shortcuts
-no strict 'refs';
+no strict 'refs'; ## no critic
 foreach my $i (qw(error warn info verbose debug)) {
     *{$i} = sub {
         my ($self, @args) = @_;

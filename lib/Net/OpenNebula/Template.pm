@@ -4,12 +4,10 @@
 # vim: set ts=3 sw=3 tw=0:
 # vim: set expandtab:
 #
-   
-
-package Net::OpenNebula::Template;
-
 use strict;
 use warnings;
+
+package Net::OpenNebula::Template;
 
 use Net::OpenNebula::RPC;
 push our @ISA , qw(Net::OpenNebula::RPC);
