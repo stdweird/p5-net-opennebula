@@ -90,14 +90,34 @@ sub freear {
 
 # Find the AR matching opts
 # opts are 
-#    ip or MAC : check that they the range (assuming IPv4)
+#    ip : check that it is in range (assuming IPv4)
+#    mac : check that it is in range
 #    size : match if range is lower or equal the size
+#    template : (try to) extract ip/mac/size from the template 
+#               ip/mac/size defined via opts take precedence 
 #    If more then opts is defined, all requirements have to fullfill
 # Only one AR is returned (first one wins) 
 # (If no opts are specified, first AR is returned)
 sub get_ar {
     my ($self, %opts) = @_;
     $self->verbose("get_ar: no options specified") if (! %opts);
+
+    if ($opts{template}) {
+        if(! exists($opts{mac}) && $opts{template} =~ m/[^#]*MAC\s*=\s*("|')((?:[0-9a-f]{2}:){5}[0-9a-f]{2})\1/i) {
+            $opts{mac} = $2;
+            $self->debug(1, "get_ar: found MAC $opts{mac} in template, none in opts");
+        }
+
+        if (! exists($opts{ip}) && $opts{template} =~ m/[^#]*IP\s*=\s*("|')((?:\d{1,3}\.){3}\d{1,3})\1/) {
+            $opts{ip} = $2;
+            $self->debug(1, "get_ar: found IP $opts{ip} in template, none in opts");
+        }
+
+        if (! exists($opts{size}) && $opts{template} =~ m/[^#]*SIZE\s*=\s*("|')(\d+)\1/) {
+            $opts{size} = $2;
+            $self->debug(1, "get_ar: found SIZE $opts{size} in template, none in opts");
+        }
+    }
 
     my %ar_pool = $self->get_ar_pool();
     return if (! %ar_pool);
