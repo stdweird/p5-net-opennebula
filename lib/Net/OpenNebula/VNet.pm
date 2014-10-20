@@ -236,13 +236,13 @@ sub get_ar_pool  {
     
     my %res;
 
-    foreach my $arref (@{$self->{extended_data}->{AR_POOL}}) {
-        my $id = int($arref->{AR}->[0]->{AR_ID}->[0]);
-        $res{$id} = $arref->{AR}->[0];
+    foreach my $arref (@{$self->{extended_data}->{AR_POOL}->[0]->{AR}}) {
+        my $id = int($arref->{AR_ID}->[0]);
+        $res{$id} = $arref;
     }
 
     if (%res) {
-        $self->verbose("AR POOL with AR instances", scalar keys %res, " found");
+        $self->verbose("AR POOL with ", scalar keys %res, " AR instances found");
     } else {
         $self->verbose("empty AR POOL");
     };
