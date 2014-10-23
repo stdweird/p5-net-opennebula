@@ -31,8 +31,8 @@ sub create {
 
 sub used {
    my ($self) = @_;
-   $self->_get_info();
-   if ($self->{extended_data}->{IMAGES}->[0]->{ID}->[0]) {
+   my $img = $self->_get_info_extended('IMAGES');
+   if (defined($img->[0]->{ID}->[0])) {
        return 1;
    } 
 };

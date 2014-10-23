@@ -27,15 +27,16 @@ sub create {
 
 sub name {
    my ($self) = @_;
-   $self->_get_info();
 
-   return $self->{extended_data}->{NAME}->[0];
+   my $name = $self->_get_info_extended('NAME');
+   
+   return $name->[0] || $self->{data}->{NAME}->[0];
 }
 
 sub used {
    my ($self) = @_;
-   $self->_get_info();
-   if ($self->{extended_data}->{TOTAL_LEASES}->[0]) {
+   my $tl = $self->_get_info_extended('TOTAL_LEASES');
+   if ($tl->[0]) {
        return 1;
    } 
 };
@@ -232,11 +233,11 @@ sub get_ar_pool  {
         return;
     }
     
-    $self->_get_info();
+    my $ap = $self->_get_info_extended('AR_POOL');
     
     my %res;
 
-    foreach my $arref (@{$self->{extended_data}->{AR_POOL}->[0]->{AR}}) {
+    foreach my $arref (@{$ap->[0]->{AR}}) {
         my $id = int($arref->{AR_ID}->[0]);
         $res{$id} = $arref;
     }

@@ -17,17 +17,17 @@ use constant ONEPOOLKEY => 'VMTEMPLATE';
 
 sub name {
    my ($self) = @_;
-   $self->_get_info();
+   my $name = $self->_get_info_extended('NAME');
 
-   return $self->{extended_data}->{NAME}->[0];
+   return $name->[0];
 }
 
 
 sub get_template_ref {
    my ($self) = @_;
-   $self->_get_info();
+   my $template = $self->_get_info_extended('TEMPLATE');
 
-   return { TEMPLATE => $self->{extended_data}->{TEMPLATE} };
+   return { TEMPLATE => $template };
 }
 
 

@@ -72,6 +72,25 @@ sub _get_info {
     }
 }
 
+# Similar to _get_info, but will try with with clearcache if C<entry> can't be 
+# found in extended_data and it returns the entry in extended_data. 
+sub _get_info_extended() {
+    my ($self, $entry) = @_;
+    $self->_get_info();
+    
+    if(! exists $self->{extended_data}->{$entry}) {
+        $self->_get_info(clearcache => 1);
+    }
+
+    if(exists $self->{extended_data}->{$entry}) {
+        $self->debug(2, "Entry $entry present in extended_data");    
+        return $self->{extended_data}->{$entry};
+    } else {
+        $self->debug(2, "Entry $entry still not present in extended_data");    
+        return []; # empty array ref
+    }
+}
+
 sub id {
    my ($self) = @_;
    return $self->{data}->{ID}->[0];

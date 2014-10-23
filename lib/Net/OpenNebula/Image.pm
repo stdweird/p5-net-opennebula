@@ -19,9 +19,9 @@ use constant STATES => qw(INIT READY USED DISABLED LOCKED ERROR CLONE DELETE USE
 
 sub name {
    my ($self) = @_;
-   $self->_get_info();
+   my $name = $self->_get_info_extended('NAME');
 
-   return $self->{extended_data}->{NAME}->[0];
+   return $name->[0];
 }
 
 sub create {
@@ -43,6 +43,12 @@ sub state {
    $self->_get_info(clearcache => 1);
 
    my $state = $self->{extended_data}->{STATE}->[0];
+
+   if(!defined($state)) {
+       $self->warn('Undefined '.ONERPC.'-state for id ', $self->id);
+       return;
+   } 
+
    return (STATES)[$state];    
 };
 

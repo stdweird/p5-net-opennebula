@@ -29,19 +29,19 @@ use Net::OpenNebula::VM::NIC;
 
 sub name {
    my ($self) = @_;
-   $self->_get_info();
+   my $template = $self->_get_info_extended('TEMPLATE');
    
    # if vm NAME is set, use that instead of template NAME
-   return $self->{data}->{NAME}->[0] || $self->{extended_data}->{TEMPLATE}->[0]->{NAME}->[0];
+   return $self->{data}->{NAME}->[0] || $template->[0]->{NAME}->[0];
 }
 
 sub nics {
    my ($self) = @_;
-   $self->_get_info();
+   my $template = $self->_get_info_extended('TEMPLATE');
 
    my @ret = ();
 
-   for my $nic (@{ $self->{extended_data}->{TEMPLATE}->[0]->{NIC} }) {
+   for my $nic (@{ $template->[0]->{NIC} }) {
       push(@ret, Net::OpenNebula::VM::NIC->new(data => $nic));
    }
 
@@ -54,6 +54,7 @@ sub start {
    $self->_get_info(clearcache => 1);
 
    my $state = $self->{extended_data}->{STATE}->[0];  
+   
    if($state == 5 || $state == 4 || $state == 8) {
       return $self->resume();
    }
@@ -67,7 +68,12 @@ sub state {
    my ($self) = @_;
    $self->_get_info(clearcache => 1);
 
-   my $state = $self->{extended_data}->{STATE}->[0];  
+   my $state = $self->{extended_data}->{STATE}->[0];
+
+   if(!defined($state)) {
+       $self->warn('Undefined '.ONERPC.'-state for id ', $self->id);
+   }
+
    if($state == 4) {
       return STOPPED;
    }
@@ -91,7 +97,7 @@ sub state {
    }
 
    # TODO what is this supposed to mean? it's impossible or a typo 
-   if($lcm_state == 0 && $lcm_state == 6) {
+   if($lcm_state == 0 || $lcm_state == 6) {
       return DONE;
    }
 
@@ -100,9 +106,10 @@ sub state {
 
 sub arch {
    my ($self) = @_;
-   $self->_get_info;
-
-   return $self->{extended_data}->{TEMPLATE}->[0]->{OS}->[0]->{ARCH}->[0];
+   
+   my $template = $self->_get_info_extended('TEMPLATE');
+   
+   return $template->[0]->{OS}->[0]->{ARCH}->[0];
 }
 
 sub get_data {

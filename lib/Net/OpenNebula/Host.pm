@@ -41,16 +41,16 @@ use constant STATES => qw(INIT MONITORING_MONITORED MONITORED ERROR DISABLED MON
 
 sub name {
    my ($self) = @_;
-   $self->_get_info();
+   my $name = $self->_get_info_extended('NAME');
 
-   return $self->{extended_data}->{NAME}->[0];
+   return $name->[0];
 }
 
 sub vms {
    my ($self) = @_;
-   $self->_get_info();
+   my $vms = $self->_get_info_extended('VMS');
    my @ret;
-   for my $vm_id (@{ $self->{extended_data}->{VMS}->[0]->{ID} }) {
+   for my $vm_id (@{ $vms->[0]->{ID} }) {
       push @ret, $self->{rpc}->get_vm($vm_id);
    }
 
@@ -59,8 +59,8 @@ sub vms {
 
 sub used {
    my ($self) = @_;
-   $self->_get_info();
-   if ($self->{extended_data}->{HOST_SHARE}->[0]->{RUNNING_VMS}->[0]) {
+   my $hs = $self->_get_info_extended('HOST_SHARE');
+   if (defined($hs->[0]->{RUNNING_VMS}->[0])) {
        return 1;
    } 
 };
@@ -89,10 +89,18 @@ sub disable {
 # Return the state as string
 sub state {
    my ($self) = @_;
-   $self->_get_info(clearcache => 1);
+
+   # Needs to be up to date info
+   $self->_get_info_(clearcache => 1);
 
    my $state = $self->{extended_data}->{STATE}->[0];
-   return (STATES)[$state];    
+
+   if(!defined($state)) {
+       $self->warn('Undefined '.ONERPC.'-state for id ', $self->id);
+       return;
+   } 
+
+   return (STATES)[$state];
 };
 
 # also from include/Host.h
