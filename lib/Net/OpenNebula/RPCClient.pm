@@ -100,6 +100,12 @@ sub _rpc {
     }
     
     my $resp = $cli->send_request($req);
+    
+    if(!ref($resp)) {
+        $self->error("_rpc send_request failed with message: $resp");
+        return;
+    }
+    
     my $ret = $resp->value;
     
     if(ref($ret) ne "ARRAY") {
