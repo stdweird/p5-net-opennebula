@@ -36,6 +36,9 @@ push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'host';
 
+# From include/Host.h
+use constant STATES => qw(INIT MONITORING_MONITORED MONITORED ERROR DISABLED MONITORING_ERROR MONITORING_INIT MONITORING_DISABLED);
+
 sub name {
    my ($self) = @_;
    $self->_get_info();
@@ -61,5 +64,46 @@ sub used {
        return 1;
    } 
 };
+
+
+# Use private _enable for the rpc enable interface
+sub _enable {
+    my ($self, $bool) = @_;
+
+    return $self->_onerpc("enable",
+                          [ int => $self->id ],
+                          [ boolean => $bool ],
+                         );
+}
+
+sub enable {
+    my $self = shift;
+    return $self->_enable(1);
+}
+
+sub disable {
+    my ($self) = @_;
+    return $self->_enable(0);
+}
+
+# Return the state as string
+sub state {
+   my ($self) = @_;
+   $self->_get_info(clearcache => 1);
+
+   my $state = $self->{extended_data}->{STATE}->[0];
+   return (STATES)[$state];    
+};
+
+# also from include/Host.h
+sub is_enabled {
+    my $self = shift;
+    return $self->state() =~ m/DISABLED$/;
+}
+
+sub is_monitoring {
+    my $self = shift;
+    return $self->state() =~ m/^MONITORING_$/;
+}
 
 1;
