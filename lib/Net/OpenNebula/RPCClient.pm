@@ -4,8 +4,6 @@ use warnings;
 # packge the DummyLogger together with the RPCClient package
 package Net::OpenNebula::DummyLogger; ## no critic
 
-use version;
-
 sub new {
     my $that = shift;
     my $proto = ref($that) || $that;
@@ -30,6 +28,8 @@ use XML::Simple;
 use RPC::XML;
 use RPC::XML::Client;
 use Data::Dumper;
+
+use version;
 
 # options
 #    user: user to connect
@@ -150,6 +150,7 @@ sub version {
         return $self->{_version};
     } else {
         $self->error("Failed to retrieve version");
+        return;
     }
 }
 
