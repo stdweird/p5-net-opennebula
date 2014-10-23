@@ -74,7 +74,7 @@ sub _get_info {
 
 # Similar to _get_info, but will try with with clearcache if C<entry> can't be 
 # found in extended_data and it returns the entry in extended_data. 
-sub _get_info_extended() {
+sub _get_info_extended {
     my ($self, $entry) = @_;
     $self->_get_info();
     
