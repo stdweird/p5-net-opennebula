@@ -91,7 +91,7 @@ sub state {
    my ($self) = @_;
 
    # Needs to be up to date info
-   $self->_get_info_(clearcache => 1);
+   $self->_get_info(clearcache => 1);
 
    my $state = $self->{extended_data}->{STATE}->[0];
 
