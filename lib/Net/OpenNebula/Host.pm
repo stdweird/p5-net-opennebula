@@ -106,7 +106,7 @@ sub state {
 # also from include/Host.h
 sub is_enabled {
     my $self = shift;
-    return $self->state() =~ m/DISABLED$/;
+    return $self->state() !~ m/DISABLED$/;
 }
 
 sub is_monitoring {
