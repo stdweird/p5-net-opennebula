@@ -191,8 +191,12 @@ sub _get_instances {
     return @ret;
 }
 
+# Given state, wait until the state is reached. 
+# Between each check, sleep number of seconds; 
+# and there's a maximum number of iterations to try. 
+# Return 1 if the state is reached, 0 otherwise. 
 # state: the state (in text) to wait for
-# opts
+# opts:
 #    sleep: sleep per interval
 #    max_iter: maximum iterations (if 0, no sleep)
 sub wait_for_state {
