@@ -182,12 +182,20 @@ sub version {
 
 # add logging shortcuts
 no strict 'refs'; ## no critic
-foreach my $i (qw(error warn info verbose debug)) {
+# The Log4Perl methods
+foreach my $i (qw(error warn info debug)) {
     *{$i} = sub {
         my ($self, @args) = @_;
         return $self->{log}->$i(@args);
-    }
-}
+    };
+};
+# verbose fallback for Log4Perl
+*{verbose} = sub {
+    my ($self, @args) = @_;
+    my $verbose = $self->{log}->can('verbose') ? 'verbose' : 'debug';
+    return $self->{log}->$verbose(@args);
+};
+
 use strict 'refs';
 
 1;
