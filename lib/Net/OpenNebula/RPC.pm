@@ -9,12 +9,18 @@ use constant ONERPC => 'rpc';
 use constant ONEPOOLKEY => undef;
 
 
+# If cacche->{add} attibute is true, add the cache for the following method
+# If cacche->{remove} attribute is true, remove the cache for the following method
+# The cache is removed before it is added (e.g. in case you want to refresh)
 sub new {
    my $that = shift;
    my $proto = ref($that) || $that;
    my $self = { @_ };
 
    $self->{ONERPC} = $proto->ONERPC; 
+
+   $self->{cache}->{add} = 0;
+   $self->{cache}->{remove} = 0;
    
    bless($self, $proto);
 
@@ -25,6 +31,16 @@ sub _onerpc {
     my ($self, $method, @args) = @_;
 
 	my $onemethod = "one.$self->{ONERPC}.$method";
+
+    if ($self->{cache}->{remove}) {
+        $self->{rpc}->remove_cache_method($onemethod);
+        $self->{cache}->{remove} = 0;
+    }
+
+    if ($self->{cache}->{add}) {
+        $self->{rpc}->add_cache_method($onemethod);
+        $self->{cache}->{add} = 0;
+    }
 		
     return $self->{rpc}->_rpc($onemethod, @args);
 }

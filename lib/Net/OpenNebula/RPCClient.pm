@@ -10,7 +10,7 @@ sub new {
     my $self = { @_ };
 
     bless($self, $proto);
-    
+
     return $self;
 }
 
@@ -86,6 +86,21 @@ sub new {
     return $self;
 }
 
+# Enable the caching of all methods calls (cache is per method/args combo)
+sub add_cache_method {
+    my ($self, $method) = @_;
+    $_cache_methods->{$method} = 1;
+}
+
+
+# Remove the caching method and cache
+sub remove_cache_method {
+    my ($self, $method) = @_;
+    $_cache_methods->{$method} = 0;
+    $_cache->{$method} = {};
+}
+
+
 sub _rpc_args_to_txt {
     my ($self, @args) = @_;
 
@@ -99,21 +114,28 @@ sub _rpc_args_to_txt {
 }
 
 sub _rpc {
-    my ($self, $meth, @params) = @_;                                                                                
-    
+    my ($self, $meth, @params) = @_;
+
     my $req_txt = "method $meth args ".$self->_rpc_args_to_txt(@params);
-    
+
     $self->debug(4, "_rpc called with $req_txt");
+
+    if ($_cache_methods->{$meth}) {
+        if ($_cache->{$meth} && exists($_cache->{$meth}->{$req_txt})) {
+            $self->debug(1, "Returning cached data for $meth / $req_txt");
+            return $_cache->{$meth}->{$req_txt};
+        }
+    }
 
     my @params_o = (RPC::XML::string->new($self->{user} . ":" . $self->{password}));
     for my $p (@params) {
         my $klass = "RPC::XML::" . $p->[0];
         push(@params_o, $klass->new($p->[1]));
-    }   
+    }
 
     my $req = RPC::XML::request->new($meth, @params_o);
     my $cli = RPC::XML::Client->new($self->{url});
-    
+
     my $reqstring = $req->as_string();
     my $password = XMLout($self->{password}, rootname => "x");
     if ($password =~ m!^\s*<x>(.*)</x>\s*$!) {
@@ -123,30 +145,46 @@ sub _rpc {
     } else {
         $self->debug(5, "_rpc RPC request not shown, failed to convert and replace password");
     }
-    
+
     my $resp = $cli->send_request($req);
-    
+
     if(!ref($resp)) {
         $self->error("_rpc send_request failed with message: $resp");
         return;
     }
-    
+
     my $ret = $resp->value;
-    
+
     if(ref($ret) ne "ARRAY") {
         $self->error("_rpc failed to make request faultCode $ret->{faultCode} faultString $ret->{faultString} $req_txt");
         return;
-    } 
-    
+    }
+
     elsif($ret->[0] == 1) {
         $self->debug(5, "_rpc RPC answer $ret->[1]");
         if($ret->[1] =~ m/^(\d|\.)+$/) {
-            return $ret->[1];
+            my $parsed = $ret->[1];
+            if ($_cache_methods->{$meth}) {
+                $_cache->{$meth}->{$req_txt} = $parsed;
+                $self->debug(5, "Result for $meth / $req_txt cached");
+            };
+            return $parsed;
         }
         else {
-            return XMLin($ret->[1], ForceArray => 1);
+            my $opts = {
+                ForceArray => $has_libxml ? ['ID', 'NAME', 'STATE', qr{.}] : 1,
+                KeyAttr => [],
+            };
+
+            my $parsed = XMLin($ret->[1], %$opts);
+            if ($_cache_methods->{$meth}) {
+                $_cache->{$meth}->{$req_txt} = $parsed;
+                $self->debug(5, "Result for $meth / $req_txt cached");
+            };
+
+            return $parsed;
         }
-    }   
+    }
 
     else {
         $self->error("_rpc Error sending request $req_txt: $ret->[1] (code $ret->[2])");
@@ -155,14 +193,14 @@ sub _rpc {
         } else {
             return;
         }
-    }   
+    }
 
 }
 
 
 sub version {
     my ($self) = @_;
-    
+
     # cached value
     if(exists($self->{_version})) {
         return $self->{_version};
