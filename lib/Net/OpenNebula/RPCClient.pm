@@ -24,12 +24,35 @@ use strict 'refs';
 
 package Net::OpenNebula::RPCClient;
 
-use XML::Simple;
+
 use RPC::XML;
 use RPC::XML::Client;
 use Data::Dumper;
+use XML::Parser;
 
 use version;
+
+if(! defined($ENV{XML_SIMPLE_PREFERRED_PARSER})) {
+    $ENV{XML_SIMPLE_PREFERRED_PARSER} = 'XML::Parser';
+};
+
+my $has_libxml;
+eval "use XML::LibXML::Simple qw(XMLin)";
+if ($@) {
+    use XML::Simple qw(XMLin XMLout);
+    use RPC::XML::ParserFactory (class => 'XML::Parser');
+    $has_libxml = 0;
+} else {
+    use XML::Simple qw(XMLout);
+    use RPC::XML::ParserFactory (class => 'XML::LibXML');
+    $has_libxml = 1;
+};
+
+# Caching
+# data_cache
+my $_cache = {};
+my $_cache_methods = {};
+
 
 # options
 #    user: user to connect
@@ -53,7 +76,9 @@ sub new {
 
     bless($self, $proto);
 
-    $self->{log}->debug(2, "Initialised with user $self->{user} and url $self->{url}.");
+    $self->{log}->debug(2, "Initialised with user $self->{user} and url $self->{url}");
+    $self->{log}->debug(2, ($has_libxml ? "U" : "Not u")."sing XML::LibXML(::Simple)");
+    $self->{log}->debug(2, "Using preferred XML::Simple parser $ENV{XML_SIMPLE_PREFERRED_PARSER}.");
 
     # Cache and test rpc
     $self->version();
