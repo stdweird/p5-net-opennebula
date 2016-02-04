@@ -20,5 +20,6 @@ doc/bootstrap.pod
 doc/html
 *.txt
 .build
+build
 .project
 Net-OpenNebula-*
