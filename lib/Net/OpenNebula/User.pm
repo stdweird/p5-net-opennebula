@@ -48,19 +48,19 @@ sub _do_grp {
 
 # chgrp groupid
 sub chgrp {
-    my ($self, $grp_id) = shift;
+    my ($self, $grp_id) = @_;
     return $self->_do_grp($grp_id, 'chgrp');
 }
 
 # addgroup groupid
 sub addgroup {
-    my ($self, $grp_id) = shift;
+    my ($self, $grp_id) = @_;
     return $self->_do_grp($grp_id, 'addgroup');
 }
 
 # delgroup groupid
 sub delgroup {
-    my ($self, $grp_id) = shift;
+    my ($self, $grp_id) = @_;
     return $self->_do_grp($grp_id, 'delgroup');
 }
 
