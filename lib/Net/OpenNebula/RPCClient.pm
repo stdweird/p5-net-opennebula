@@ -37,7 +37,7 @@ if(! defined($ENV{XML_SIMPLE_PREFERRED_PARSER})) {
 };
 
 my $has_libxml;
-eval { use XML::LibXML::Simple qw(XMLin); };
+eval { "use XML::LibXML::Simple qw(XMLin);" }; ## no critic (BuiltinFunctions::ProhibitStringyEval)
 if ($@) {
     use XML::Simple qw(XMLin XMLout);
     use RPC::XML::ParserFactory (class => 'XML::Parser');

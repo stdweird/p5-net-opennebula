@@ -78,7 +78,7 @@ sub chauth
     $self->debug(1, "$self->{ONERPC} $method id ".$self->id." driver $driver " . (length($passwd) ? 'non-' : ''). "empty password");
     return $self->_onerpc($method,
                           [ int => $self->id ],
-                          [ string => $dirver ],
+                          [ string => $driver ],
                           [ string => $passwd ],
                           );
 }
