@@ -64,4 +64,23 @@ sub delgroup {
     return $self->_do_grp($grp_id, 'delgroup');
 }
 
+# chauth
+# when passwd is undefined, empty string is used (i.e. password is not changed)
+sub chauth
+{
+    my ($self, $driver, $passwd) = @_;
+
+    $passwd = '' if(!defined($passwd));
+
+    my $method = 'chauth';
+    $self->has_id($method) || return;
+
+    $self->debug(1, "$self->{ONERPC} $method id ".$self->id." driver $driver " . (length($passwd) ? 'non-' : ''). "empty password");
+    return $self->_onerpc($method,
+                          [ int => $self->id ],
+                          [ string => $dirver ],
+                          [ string => $passwd ],
+                          );
+}
+
 1;
