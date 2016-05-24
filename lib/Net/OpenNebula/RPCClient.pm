@@ -126,6 +126,12 @@ sub _rpc {
         }
     }
 
+    my $cli = $self->{__cli};
+    if (! $cli) {
+        $self->{__cli} = RPC::XML::Client->new($self->{url});
+        $cli = $self->{__cli};
+    };
+
     my @params_o = (RPC::XML::string->new($self->{user} . ":" . $self->{password}));
     for my $p (@params) {
         my $klass = "RPC::XML::" . $p->[0];
@@ -133,7 +139,6 @@ sub _rpc {
     }
 
     my $req = RPC::XML::request->new($meth, @params_o);
-    my $cli = RPC::XML::Client->new($self->{url});
 
     my $reqstring = $req->as_string();
     my $password = XMLout($self->{password}, rootname => "x");
