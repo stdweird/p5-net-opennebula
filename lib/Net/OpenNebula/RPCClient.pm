@@ -40,19 +40,18 @@ my $has_libxml;
 eval "use XML::LibXML::Simple qw(XMLin);"; ## no critic (BuiltinFunctions::ProhibitStringyEval)
 if ($@) {
     use XML::Simple qw(XMLin XMLout);
-    use RPC::XML::ParserFactory (class => 'XML::Parser');
     $has_libxml = 0;
 } else {
     use XML::Simple qw(XMLout);
-    use RPC::XML::ParserFactory (class => 'XML::LibXML');
     $has_libxml = 1;
 };
+
+use RPC::XML::ParserFactory (class => $has_libxml ? 'XML::LibXML' : 'XML::Parser');
 
 # Caching
 # data_cache
 my $_cache = {};
 my $_cache_methods = {};
-
 
 # options
 #    user: user to connect
