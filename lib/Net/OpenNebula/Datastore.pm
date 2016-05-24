@@ -14,19 +14,11 @@ push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'datastore';
 
-sub name {
-   my ($self) = @_;
-   $self->_get_info();
-   
-   # if datastore NAME is set, use that instead of template NAME
-   return $self->{data}->{NAME}->[0] || $self->{data}->{TEMPLATE}->[0]->{NAME}->[0];
-}
-
 sub create {
-   my ($self, $tpl_txt, %option) = @_;
-   return $self->_allocate([ string => $tpl_txt ],
-                           [ int => (exists $option{cluster} ? $option{cluster} : -1) ],
-                           );
+    my ($self, $tpl_txt, %option) = @_;
+    return $self->_allocate([ string => $tpl_txt ],
+                            [ int => (exists $option{cluster} ? $option{cluster} : -1) ],
+        );
 }
 
 sub used {

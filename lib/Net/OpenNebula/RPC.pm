@@ -7,6 +7,7 @@ use Data::Dumper;
 
 use constant ONERPC => 'rpc';
 use constant ONEPOOLKEY => undef;
+use constant NAME_FROM_TEMPLATE => 0;
 
 
 # If cacche->{add} attibute is true, add the cache for the following method
@@ -72,6 +73,7 @@ sub _onerpc_simple {
 # opts
 #   clearcache: if set to 1, clears the cache and queries again
 #   id: get info for other id (if missing, use $self->id)
+# Return extended_data (and if not existing, rerieves and sets extended_data)
 sub _get_info {
     my ($self, %option) = @_;
 
@@ -86,6 +88,8 @@ sub _get_info {
     if(! exists $self->{extended_data} || (exists $option{clearcache} && $option{clearcache} == 1)) {
         $self->{extended_data} = $self->_onerpc("info", [ int => $id ]);
     }
+
+    return $self->{extended_data};
 }
 
 # Similar to _get_info, but will try with with clearcache if C<entry> can't be
@@ -105,6 +109,30 @@ sub _get_info_extended {
         $self->debug(2, "Entry $entry still not present in extended_data");
         return []; # empty array ref
     }
+}
+
+
+sub name {
+    my ($self) = @_;
+
+    my $name;
+
+    if (NAME_FROM_TEMPLATE) {
+        my $ext_name = $self->_get_info_extended('NAME');
+
+        $name = $ext_name->[0];
+    }
+
+    if (!defined($name)) {
+        $name = $self->{data}->{NAME}->[0];
+        if (! $name) {
+            my $template = $self->_get_info_extended('TEMPLATE');
+            # if vm NAME is set, use that instead of template NAME
+            $name = $template->[0]->{NAME}->[0];
+        }
+    }
+
+    return $name;
 }
 
 sub id {
@@ -182,14 +210,6 @@ sub update {
                           );
 }
 
-# Chown
-# options
-#    uid : uid to use
-#    gid : gid to use
-#    one : Net::OpenNebula instance to use for user/groupname lookup
-#          (i.e. when uid/gid is not a integer)
-#          It wil use $one->get_users and/or $one->get_groups methods.
-
 sub _lookup
 {
     my ($self, $type, $id, $one) = @_;
@@ -225,6 +245,14 @@ sub _lookup
     }
 }
 
+
+# Chown
+# options
+#    uid : uid to use
+#    gid : gid to use
+#    one : Net::OpenNebula instance to use for user/groupname lookup
+#          (i.e. when uid/gid is not a integer)
+#          It wil use $one->get_users and/or $one->get_groups methods.
 
 sub chown
 {

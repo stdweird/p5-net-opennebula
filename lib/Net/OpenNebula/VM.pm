@@ -27,14 +27,6 @@ use constant {
 
 use Net::OpenNebula::VM::NIC;
 
-sub name {
-   my ($self) = @_;
-   my $template = $self->_get_info_extended('TEMPLATE');
-   
-   # if vm NAME is set, use that instead of template NAME
-   return $self->{data}->{NAME}->[0] || $template->[0]->{NAME}->[0];
-}
-
 sub nics {
    my ($self) = @_;
    my $template = $self->_get_info_extended('TEMPLATE');

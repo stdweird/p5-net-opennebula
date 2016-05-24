@@ -14,14 +14,7 @@ push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'template';
 use constant ONEPOOLKEY => 'VMTEMPLATE';
-
-sub name {
-   my ($self) = @_;
-   my $name = $self->_get_info_extended('NAME');
-
-   return $name->[0];
-}
-
+use constant NAME_FROM_TEMPLATE => 1;
 
 sub get_template_ref {
    my ($self) = @_;

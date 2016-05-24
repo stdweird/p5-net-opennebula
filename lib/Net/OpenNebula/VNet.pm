@@ -1,6 +1,6 @@
 #
 # (c) Jan Gehring <jan.gehring@gmail.com>
-# 
+#
 # vim: set ts=3 sw=3 tw=0:
 # vim: set expandtab:
 #
@@ -17,6 +17,7 @@ push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'vn';
 use constant ONEPOOLKEY => 'VNET';
+use constant NAME_FROM_TEMPLATE => 1;
 
 sub create {
    my ($self, $tpl_txt, %option) = @_;
@@ -25,20 +26,12 @@ sub create {
                            );
 }
 
-sub name {
-   my ($self) = @_;
-
-   my $name = $self->_get_info_extended('NAME');
-   
-   return $name->[0] || $self->{data}->{NAME}->[0];
-}
-
 sub used {
    my ($self) = @_;
    my $tl = $self->_get_info_extended('TOTAL_LEASES');
    if ($tl->[0]) {
        return 1;
-   } 
+   }
 };
 
 # New since 4.8.0
@@ -63,7 +56,7 @@ sub _ar {
     };
 
     return $self->_onerpc("${mode}_ar",
-                          [ int => $self->id ], 
+                          [ int => $self->id ],
                           $what,
                           );
 }
@@ -90,14 +83,14 @@ sub freear {
 }
 
 # Find the AR matching opts
-# opts are 
+# opts are
 #    ip : check that it is in range (assuming IPv4)
 #    mac : check that it is in range
 #    size : match if range is lower or equal the size
-#    template : (try to) extract ip/mac/size from the template 
-#               ip/mac/size defined via opts take precedence 
+#    template : (try to) extract ip/mac/size from the template
+#               ip/mac/size defined via opts take precedence
 #    If more then opts is defined, all requirements have to fullfill
-# Only one AR is returned (first one wins) 
+# Only one AR is returned (first one wins)
 # (If no opts are specified, first AR is returned)
 sub get_ar {
     my ($self, %opts) = @_;
@@ -135,18 +128,18 @@ sub get_ar {
 
         # use inverse logic because all requirements have to match
         my $match = 1;
-        
+
         # no match if requested size is larger then set one
         if (exists($opts{size}) && $opts{size} > $size) {
             $self->debug(2, "$msg NO match: requested size $opts{size} larger then AR Size $size");
-            $match = 0;    
+            $match = 0;
         }
-        
+
         if (exists($opts{mac})) {
             # get the range
             if(!defined($mac)) {
                 $self->debug(2, "$msg NO match: requested mac $opts{mac}, but no MAC defined");
-                $match = 0;    
+                $match = 0;
             } else {
                 # http://www.perlmonks.org/?node_id=440768
                 # Use doubles, no int (bit operators use ints)
@@ -161,9 +154,9 @@ sub get_ar {
                     }
                     return $mac_num;
                 };
-                
+
                 my $om = &$mac_hex2num($opts{mac});
-                my $am = &$mac_hex2num($mac); 
+                my $am = &$mac_hex2num($mac);
                 # include boundaries of size?
                 if( ($om < $am) || ($om > ($am + $size -1) )) {
                     $self->debug(2, "$msg NO match: requested mac $opts{mac} falls outside the range starting with AR MAC $mac and size $size (int mac $om AR MAC $am)");
@@ -171,12 +164,12 @@ sub get_ar {
                 }
             }
         }
-        
+
         if (exists($opts{ip})) {
             # get the range
             if(!defined($ip)) {
                 $self->debug(2, "$msg NO match: requested ip $opts{ip}, but no IP defined");
-                $match = 0;    
+                $match = 0;
             } else {
                 # Use doubles, no int (bit operators use ints)
                 my $ip2num = sub {
@@ -187,9 +180,9 @@ sub get_ar {
                     }
                     return $num;
                 };
-                
+
                 my $oi = &$ip2num($opts{ip});
-                my $ai = &$ip2num($ip); 
+                my $ai = &$ip2num($ip);
                 # include boundaries of size?
                 if( ($oi < $ai) || ($oi > ($ai + $size -1) )) {
                     $self->debug(2, "$msg NO match: requested ip $opts{ip} falls outside the range starting with AR IP $ip and size $size (int ip $oi AR IP $ai)");
@@ -197,7 +190,7 @@ sub get_ar {
                 }
             }
         }
-        
+
         if($match) {
             $self->debug(1, "$msg found match, returning AR.");
             return $ar_pool{$id};
@@ -213,7 +206,7 @@ sub get_ar {
 # Using same opts as get_ar, returns the ID
 sub get_ar_id {
     my($self, %opts) = @_;
-    
+
     my $arref = $self->get_ar(%opts);
     if(defined($arref)) {
         my $id = $arref->{AR_ID}->[0];
@@ -232,9 +225,9 @@ sub get_ar_pool  {
         $self->error("AR RPC API new since 4.8.0");
         return;
     }
-    
+
     my $ap = $self->_get_info_extended('AR_POOL');
-    
+
     my %res;
 
     foreach my $arref (@{$ap->[0]->{AR}}) {
@@ -247,7 +240,7 @@ sub get_ar_pool  {
     } else {
         $self->verbose("empty AR POOL");
     };
-    
+
     return %res;
 }
 
@@ -262,9 +255,9 @@ sub _leases {
     }
 
     $mode = "add" if (! ($mode && $mode =~ m/^(add|rm)$/));
-	
-    return $self->_onerpc("${mode}leases", 
-                          [ int => $self->id ], 
+
+    return $self->_onerpc("${mode}leases",
+                          [ int => $self->id ],
                           [ string => $txt ]
                           );
 }
