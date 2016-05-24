@@ -316,8 +316,10 @@ sub _get_instances {
 
     my $reply = $self->{rpc}->_rpc("one.$pool.info", @args);
 
-    for my $data (@{ $reply->{$key} }) {
-        my $inst = $self->new(rpc => $self->{rpc}, data => $data);
+    foreach my $data (@{ $reply->{$key} }) {
+        # This is data from pool.info, so it is as complete as individual info
+        # so we can set it as extended_data
+        my $inst = $self->new(rpc => $self->{rpc}, data => $data, extended_data => $data);
         if (! defined($nameregex) || ($inst->name && $inst->name =~ $nameregex) ) {
             push(@ret, $inst);
         }
