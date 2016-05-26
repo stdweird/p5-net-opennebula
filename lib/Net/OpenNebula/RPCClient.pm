@@ -75,7 +75,7 @@ sub new {
 
     bless($self, $proto);
 
-    $self->{log}->debug(2, "Initialised with user $self->{user} and url $self->{url}");
+    $self->{log}->debug(2, "Initialised with user $self->{user} and url $self->{url}") if ($self->{user} and $self->{url});
     $self->{log}->debug(2, ($has_libxml ? "U" : "Not u")."sing XML::LibXML(::Simple)");
     $self->{log}->debug(2, "Using preferred XML::Simple parser $ENV{XML_SIMPLE_PREFERRED_PARSER}.");
 
