@@ -200,13 +200,19 @@ sub create_vm {
 sub create_host {
     my ($self, %option) = @_;
 
-    my $id = $self->_rpc("one.host.allocate",
-                              [ string => $option{name} ],
-                              [ string => $option{im_mad} ],
-                              [ string => $option{vmm_mad} ],
-                              [ string => $option{vnm_mad} ],
-                              [ int => (exists $option{cluster} ? $option{cluster} : -1) ] );
+    my @args = (
+        "one.host.allocate",
+        [ string => $option{name} ],
+        [ string => $option{im_mad} ],
+        [ string => $option{vmm_mad} ],
+        );
 
+    if ($self->version() < version->new('5.0.0')) {
+        push(@args, [ string => $option{vnm_mad} ]);
+    };
+    push(@args, [ int => (exists $option{cluster} ? $option{cluster} : -1) ]);
+
+    my $id = $self->_rpc(@args);
 
     if(! defined($id)) {
         $self->error("Create host failed");
