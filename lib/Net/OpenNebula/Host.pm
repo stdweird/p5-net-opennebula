@@ -31,6 +31,8 @@ Query the Hoststatus of an OpenNebula host.
 
 package Net::OpenNebula::Host;
 
+use version;
+
 use Net::OpenNebula::RPC;
 push our @ISA , qw(Net::OpenNebula::RPC);
 
@@ -70,14 +72,31 @@ sub _enable {
                          );
 }
 
+# Use private _status to enable/disable/offline hyps (since ONE 5.0)
+# status(int): 0 enabled, 1 disabled, 2 offline
+sub _status {
+    my ($self, $status) = @_;
+
+    return $self->_onerpc("status",
+                          [ int => $self->id ],
+                          [ int => $status ],
+                         );
+}
+
 sub enable {
     my $self = shift;
-    return $self->_enable(1);
+    if ($self->{rpc}->version() < version->new('5.0.0')) {
+        return $self->_enable(1);
+    };
+    return $self->_status(0);
 }
 
 sub disable {
     my ($self) = @_;
-    return $self->_enable(0);
+    if ($self->{rpc}->version() < version->new('5.0.0')) {
+        return $self->_enable(0);
+    };
+    return $self->_status(1);
 }
 
 # Return the state as string
