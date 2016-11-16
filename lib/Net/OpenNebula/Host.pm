@@ -87,16 +87,18 @@ sub enable {
     my $self = shift;
     if ($self->{rpc}->version() < version->new('5.0.0')) {
         return $self->_enable(1);
+    } else {
+        return $self->_status(0);
     };
-    return $self->_status(0);
 }
 
 sub disable {
     my ($self) = @_;
     if ($self->{rpc}->version() < version->new('5.0.0')) {
         return $self->_enable(0);
+    } else {
+        return $self->_status(1);
     };
-    return $self->_status(1);
 }
 
 # Return the state as string
