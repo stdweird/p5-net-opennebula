@@ -59,6 +59,9 @@ my $_cache_methods = {};
 #    url: the RPC url to use
 #    log: optional log4perl-like instance
 #    fail_on_rpc_fail: die on RPC error or not
+#    useragent: options passed to LWP::UserAgent (via RPC::XML useragent option)
+#    ca: CA file or dir, is passed as SSL_ca_file or SSL_ca_path via useragent
+#        does not override useragent settings; enables verify_hostname
 sub new {
     my $that = shift;
     my $proto = ref($that) || $that;
@@ -127,8 +130,26 @@ sub _rpc {
     }
 
     my $cli = $self->{__cli};
+    my %opts;
+
+    if (exists($self->{ca})) {
+        my $optname = "SSL_ca_" . (-f $self->{ca} ? 'file' : 'path');
+        my $set_verify_hostname = 1;
+        my $set_optname = 1;
+        if (exists($self->{useragent}) && exists ($self->{useragent}->{ssl_opts})) {
+            my $ssl_opts = $self->{useragent}->{ssl_opts};
+            $set_verify_hostname = ! exists($ssl_opts->{verify_hostname});
+            $set_optname = ! exists($ssl_opts->{$optname});
+        }
+        $self->{useragent}->{ssl_opts}->{verify_hostname} = 1 if $set_verify_hostname;
+        $self->{useragent}->{ssl_opts}->{$optname} = $self->{ca} if $set_optname;
+    }
+    # RPC::XML::Client expects that useragent is an arrayref, which is passed
+    # as an array to LWP::UserAgent, which interprets it as a hash
+    $opts{useragent} = [%{$self->{useragent}}] if exists($self->{useragent});
+
     if (! $cli) {
-        $self->{__cli} = RPC::XML::Client->new($self->{url});
+        $self->{__cli} = RPC::XML::Client->new($self->{url}, %opts);
         $cli = $self->{__cli};
     };
 
