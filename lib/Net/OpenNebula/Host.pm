@@ -56,7 +56,7 @@ sub vms {
 sub used {
     my ($self) = @_;
     my $hs = $self->_get_info_extended('HOST_SHARE');
-    if (defined($hs->[0]->{RUNNING_VMS}->[0])) {
+    if ($hs->[0]->{RUNNING_VMS}->[0]) {
         return 1;
     }
 };
