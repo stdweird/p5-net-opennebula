@@ -5,12 +5,10 @@
 # vim: set expandtab:
 #
 # !no_doc!
-  
-
-package Net::OpenNebula::Cluster;
-
 use strict;
 use warnings;
+
+package Net::OpenNebula::Cluster;
 
 use Net::OpenNebula::RPC;
 push our @ISA , qw(Net::OpenNebula::RPC);

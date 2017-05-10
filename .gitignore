@@ -19,3 +19,6 @@ create_pod.sh
 doc/bootstrap.pod
 doc/html
 *.txt
+.build
+.project
+Net-OpenNebula-*

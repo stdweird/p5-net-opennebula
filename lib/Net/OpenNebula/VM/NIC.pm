@@ -4,11 +4,10 @@
 # vim: set ts=3 sw=3 tw=0:
 # vim: set expandtab:
 #
-   
-package Net::OpenNebula::VM::NIC;
-
 use strict;
 use warnings;
+
+package Net::OpenNebula::VM::NIC;
 
 sub new {
    my $that = shift;
