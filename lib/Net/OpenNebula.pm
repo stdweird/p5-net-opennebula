@@ -170,6 +170,15 @@ sub get_images {
                                );
 }
 
+sub create_cluster {
+   my ($self, $name) = @_;
+
+   my $new = Net::OpenNebula::Cluster->new(rpc => $self, data => undef);
+   $new->create($name);
+
+   return $new;
+}
+
 sub create_vm {
     my ($self, %option) = @_;
 
