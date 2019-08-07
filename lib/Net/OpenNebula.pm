@@ -43,6 +43,7 @@ use Net::OpenNebula::Image;
 use Net::OpenNebula::Template;
 use Net::OpenNebula::User;
 use Net::OpenNebula::VM;
+use Net::OpenNebula::VMGroup;
 use Net::OpenNebula::VNet;
 
 sub get_clusters {
@@ -136,6 +137,12 @@ sub get_vm {
 
 }
 
+sub get_vmgroups {
+   my ($self, $nameregex) = @_;
+
+   my $new = Net::OpenNebula::VMGroup->new(rpc => $self);
+   return $new->_get_instances($nameregex);
+}
 
 sub get_templates {
    my ($self, $nameregex) = @_;
@@ -268,6 +275,14 @@ sub create_template {
    return $new;
 }
 
+sub create_vmgroup {
+   my ($self, $txt) = @_;
+
+   my $new = Net::OpenNebula::VMGroup->new(rpc => $self, data => undef);
+   $new->create($txt);
+
+   return $new;
+}
 
 sub create_vnet {
    my ($self, $txt) = @_;
