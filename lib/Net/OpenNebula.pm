@@ -141,7 +141,11 @@ sub get_vmgroups {
    my ($self, $nameregex) = @_;
 
    my $new = Net::OpenNebula::VMGroup->new(rpc => $self);
-   return $new->_get_instances($nameregex);
+   return $new->_get_instances($nameregex,
+                               [ int => -2 ], # all VM groups
+                               [ int => -1 ], # range start
+                               [ int => -1 ], # range end
+                               );
 }
 
 sub get_templates {
